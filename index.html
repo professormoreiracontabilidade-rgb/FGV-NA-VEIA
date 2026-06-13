@@ -62,18 +62,43 @@ function save(){localStorage.setItem('pm_idx',idx);localStorage.setItem('pm_answ
 function pct(){return ((idx+1)/QUESTIONS.length*100)}
 function setButtons(html){document.getElementById('buttons').innerHTML=html}
 function updateProgress(){document.getElementById('progress').style.width = mode==='start'?'0%':pct()+'%'}
-function start(){mode='question'; idx=0; save(); render()}
+function start(){
+if(localStorage.getItem('pm_nome_enviado')!=='1'){
+alert('Para iniciar, digite seu nome e envie a mensagem para o WhatsApp do Professor Moreira.');
+renderStart();
+return;
+}
+mode='question'; idx=0; save(); render()
+}
+function enviarNomeWhatsApp(){
+const campo=document.getElementById('nomeAluno');
+const nome=(campo?campo.value:'').trim();
+if(!nome){alert('Digite seu nome completo para liberar o quiz.'); if(campo) campo.focus(); return;}
+localStorage.setItem('pm_nome_aluno',nome);
+localStorage.setItem('pm_nome_enviado','1');
+const msg=`Professor Moreira, meu nome é ${nome}. Quero iniciar o quiz: 40 QUESTÕES DO CFC/FGV - CONTABILIDADE GERAL.`;
+window.open('https://wa.me/5561985323574?text='+encodeURIComponent(msg),'_blank');
+renderStart();
+}
 function renderStart(){
 mode='start';
 updateProgress();
+const liberado=localStorage.getItem('pm_nome_enviado')==='1';
+const nomeSalvo=localStorage.getItem('pm_nome_aluno')||'';
 document.getElementById('screen').innerHTML=`
 <div class="card start">
 <h1 style="font-size:42px;font-weight:900;color:#06224a;line-height:1.15;text-align:center;margin:20px 0;">
 40 QUESTÕES DO CFC/FGV<br>
 CONTABILIDADE GERAL
 </h1>
+<div style="margin-top:20px;text-align:left;">
+<label style="display:block;font-size:18px;font-weight:900;color:#06224a;margin-bottom:8px;">Digite seu nome para liberar o quiz:</label>
+<input id="nomeAluno" value="${escapeHtml(nomeSalvo)}" placeholder="Seu nome completo" style="width:100%;font-size:20px;font-weight:800;padding:15px;border:2px solid #cdd9ea;border-radius:14px;outline:none;">
+<button class="btn green full" style="width:100%;margin-top:12px;" onclick="enviarNomeWhatsApp()">ENVIAR NOME PARA O WHATSAPP</button>
+${liberado?'<div style="margin-top:12px;padding:12px;border-radius:12px;background:#eafaf1;color:#0f8b4c;font-size:17px;font-weight:900;text-align:center;">Nome enviado. Quiz liberado.</div>':'<div style="margin-top:10px;font-size:15px;font-weight:800;color:#455a74;text-align:center;">O botão iniciar só aparece depois do envio do nome.</div>'}
+</div>
 </div>`;
-setButtons(`<button class="btn orange full" onclick="start()">INICIAR QUIZ</button>`);
+setButtons(liberado?`<button class="btn orange full" onclick="start()">INICIAR QUIZ</button>`:`<button class="btn secondary full" onclick="enviarNomeWhatsApp()">ENVIAR NOME E LIBERAR</button>`);
 }
 function renderQuestion(){mode='question'; save(); updateProgress(); const q=QUESTIONS[idx]; const selected=answers[q.n]||''; document.getElementById('screen').innerHTML=`<div class="card"><div class="badge">Questão ${idx+1} de ${QUESTIONS.length}</div><div class="qtext">${escapeHtml(q.stem)}</div><div class="options">${q.options.map(o=>`<button class="opt ${selected===o.letter?'selected':''}" onclick="choose('${o.letter}')"><span class="letter">${o.letter}</span>${escapeHtml(o.text)}</button>`).join('')}</div><div class="small">Toque em uma alternativa. Depois toque em “Ver resposta”.</div></div>`; setButtons(`<button class="btn secondary" onclick="prevQ()">VOLTAR</button><button class="btn orange" onclick="showAnswer()">VER RESPOSTA</button>`);}
 function renderAnswer(){mode='answer'; save(); updateProgress(); const q=QUESTIONS[idx]; const chosen=answers[q.n]||'Não marcada'; const ok=chosen===q.answer; document.getElementById('screen').innerHTML=`<div class="card"><div class="badge">Resposta da questão ${idx+1}</div><div class="answer-key">Gabarito: letra ${q.answer}</div><div class="answer-box">Sua marcação: <b>${chosen}</b> ${chosen==='Não marcada'?'':(ok?'✅':'❌')}</div><div class="comment"><b>Comentário Professor Moreira:</b><br>${escapeHtml(q.comment)}</div><div class="options">${q.options.map(o=>`<div class="opt ${o.letter===q.answer?'correct':(o.letter===chosen && chosen!==q.answer?'wrong':'')}"><span class="letter">${o.letter}</span>${escapeHtml(o.text)}</div>`).join('')}</div></div>`; setButtons(`<button class="btn secondary" onclick="renderQuestion()">VOLTAR À QUESTÃO</button><button class="btn green" onclick="nextQ()">PRÓXIMA</button>`);}
