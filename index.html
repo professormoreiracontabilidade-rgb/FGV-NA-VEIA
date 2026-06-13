@@ -46,7 +46,7 @@ main{flex:1;padding:16px 14px 105px;}
 @media(max-width:420px){.qtext{font-size:19px}.opt{font-size:17px}main{padding-left:10px;padding-right:10px}}
 </style>
 </head>
-<body>
+<body><div style="text-align:center;font-size:42px;font-weight:bold;padding:20px;">40 QUESTÕES DO CFC/FGV - CONTABILIDADE GERAL</div>
 <div class="app">
 <header><div class="brand">Curso de Contabilidade • Professor Moreira</div><div class="title">Mobile Quiz</div></header>
 <div class="progress-wrap"><div id="progress" class="progress"></div></div>
@@ -63,25 +63,7 @@ function pct(){return ((idx+1)/QUESTIONS.length*100)}
 function setButtons(html){document.getElementById('buttons').innerHTML=html}
 function updateProgress(){document.getElementById('progress').style.width = mode==='start'?'0%':pct()+'%'}
 function start(){mode='question'; idx=0; save(); render()}
-function renderStart(){
-mode='start';
-updateProgress();
-
-document.getElementById('screen').innerHTML=`
-<div class="card start">
-
-<h1 style="
-font-size:42px;
-font-weight:900;
-color:#06224a;
-line-height:1.15;
-text-align:center;
-margin:20px 0;
-">
-40 QUESTÕES DO CFC/FGV<br>
-CONTABILIDADE GERAL
-</h1>
-</div>`;</p></div>`; setButtons(`<button class="btn orange full" onclick="start()">INICIAR QUIZ</button>`);}
+function renderStart(){mode='start'; updateProgress(); document.getElementById('screen').innerHTML=`<div class="card start"><div class="badge">Padrão Professor Moreira</div><h1>Quiz de Contabilidade</h1><p></p><p><b>40 questões</b> SÓ QUESTÕES DO CFC/FGV</p></div>`; setButtons(`<button class="btn orange full" onclick="start()">INICIAR QUIZ</button>`);}
 function renderQuestion(){mode='question'; save(); updateProgress(); const q=QUESTIONS[idx]; const selected=answers[q.n]||''; document.getElementById('screen').innerHTML=`<div class="card"><div class="badge">Questão ${idx+1} de ${QUESTIONS.length}</div><div class="qtext">${escapeHtml(q.stem)}</div><div class="options">${q.options.map(o=>`<button class="opt ${selected===o.letter?'selected':''}" onclick="choose('${o.letter}')"><span class="letter">${o.letter}</span>${escapeHtml(o.text)}</button>`).join('')}</div><div class="small">Toque em uma alternativa. Depois toque em “Ver resposta”.</div></div>`; setButtons(`<button class="btn secondary" onclick="prevQ()">VOLTAR</button><button class="btn orange" onclick="showAnswer()">VER RESPOSTA</button>`);}
 function renderAnswer(){mode='answer'; save(); updateProgress(); const q=QUESTIONS[idx]; const chosen=answers[q.n]||'Não marcada'; const ok=chosen===q.answer; document.getElementById('screen').innerHTML=`<div class="card"><div class="badge">Resposta da questão ${idx+1}</div><div class="answer-key">Gabarito: letra ${q.answer}</div><div class="answer-box">Sua marcação: <b>${chosen}</b> ${chosen==='Não marcada'?'':(ok?'✅':'❌')}</div><div class="comment"><b>Comentário Professor Moreira:</b><br>${escapeHtml(q.comment)}</div><div class="options">${q.options.map(o=>`<div class="opt ${o.letter===q.answer?'correct':(o.letter===chosen && chosen!==q.answer?'wrong':'')}"><span class="letter">${o.letter}</span>${escapeHtml(o.text)}</div>`).join('')}</div></div>`; setButtons(`<button class="btn secondary" onclick="renderQuestion()">VOLTAR À QUESTÃO</button><button class="btn green" onclick="nextQ()">PRÓXIMA</button>`);}
 function renderEnd(){mode='end'; updateProgress(); let correct=QUESTIONS.filter(q=>answers[q.n]===q.answer).length; document.getElementById('screen').innerHTML=`<div class="card start"><div class="badge">Resultado Final</div><h1>Quiz concluído</h1><div class="stats"><div class="stat">Acertos<br><span style="font-size:28px;color:var(--verde)">${correct}</span></div><div class="stat">Total<br><span style="font-size:28px;color:var(--azul)">${QUESTIONS.length}</span></div></div><div class="grid">${QUESTIONS.map((q,i)=>`<button class="navnum ${answers[q.n]?'answered':''}" onclick="idx=${i};renderQuestion()">${i+1}</button>`).join('')}</div></div>`; setButtons(`<button class="btn secondary" onclick="restart()">RECOMEÇAR</button><button class="btn orange" onclick="idx=0;renderQuestion()">REVISAR</button>`);}
